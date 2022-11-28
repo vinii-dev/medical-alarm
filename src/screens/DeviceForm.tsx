@@ -18,7 +18,7 @@ export const DeviceForm = () => {
   const [alarmList, setAlarmList] = useState();
 
   return (
-    <Flex padding={4} justifyContent="space-between" height="full">
+    <Flex px={4} pb={4} justifyContent="space-between" height="full">
       <VStack space={4}>
         <FormControl>
           <Input labelName="Nome" placeholder="Ex.: Remédios da Mãez" />

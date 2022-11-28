@@ -26,7 +26,7 @@ const AppRoutes = () => (
           fontSize: 24,
         },
       }}
-      initialRouteName="Home"
+      initialRouteName="DeviceForm"
     >
       <Stack.Screen
         name="DeviceForm"
