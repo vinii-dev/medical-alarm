@@ -7,15 +7,44 @@ import {
   Text,
   VStack,
 } from 'native-base';
-import React, { useState } from 'react';
-import { AlarmCard } from '../components/AlarmCard';
+import React, { useEffect, useState } from 'react';
+import { AlarmCard, AlarmType } from '../components/AlarmCard';
 import { Input } from '../components/Input';
 import { Modal } from '../components/DeviceForm/Modal';
 import RNDateTimePicker from '@react-native-community/datetimepicker';
+import { createInitialAlarm } from '../utils/alarmUtils';
+import { AlarmCardList } from '../components/AlarmCardList';
+import { QrCodeCamera } from '../components/DeviceForm/QrCodeCamera';
+import { BarCodeScannerResult } from 'expo-barcode-scanner';
+import { Camera } from 'expo-camera';
 
-export const DeviceForm = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [alarmList, setAlarmList] = useState();
+export const DeviceForm = ({ navigation }: any) => {
+  const [alarmList, setAlarmList] = useState<AlarmType[]>([
+    createInitialAlarm(),
+  ]);
+  const [openQrCode, setOpenQrCode] = useState(false);
+
+  const onQrCodeClick = () => {
+    setOpenQrCode(true);
+    navigation.setOptions({ headerShown: false });
+  };
+
+  const handleBarCodeScanned = ({ data }: BarCodeScannerResult) => {
+    setOpenQrCode(false);
+    navigation.setOptions({ headerShown: true });
+  };
+
+  if (openQrCode) {
+    return (
+      <QrCodeCamera
+        onHandleBarCodeScanned={handleBarCodeScanned}
+        onIconClose={() => {
+          setOpenQrCode(false);
+          navigation.setOptions({ headerShown: true });
+        }}
+      />
+    );
+  }
 
   return (
     <Flex px={4} pb={4} justifyContent="space-between" height="full">
@@ -27,33 +56,19 @@ export const DeviceForm = () => {
           <Input
             labelName="Código do sensor"
             placeholder="Ex.: 573727bf-82bb-49cd-819b-f82f8312f357"
-            InputhtElement={<IconButton />}
+            rightElement={
+              <IconButton
+                size="sm"
+                mr={2}
+                onPress={onQrCodeClick}
+                icon={<AddIcon />}
+              />
+            } // TODO: Change AddIcon to scanner icon
           />
         </FormControl>
         <FormControl>
-          <Flex
-            justifyContent="space-between"
-            alignItems="center"
-            flexDir="row"
-          >
-            <FormControl.Label _text={{ bold: true, fontSize: 16 }}>
-              Alarmes
-            </FormControl.Label>
-            <Text color="muted.400">1/3</Text>
-          </Flex>
-          <VStack my={1} space={2}>
-            {[''].map(() => {
-              return <AlarmCard />;
-            })}
-          </VStack>
-          <IconButton
-            onPress={() => setIsModalOpen(true)}
-            mt={1}
-            variant="ghost"
-            icon={<AddIcon size="sm" />}
-          />
+          <AlarmCardList alarmList={alarmList} setAlarmList={setAlarmList} />
         </FormControl>
-        <RNDateTimePicker value={new Date()} mode="time" />
       </VStack>
       <Button>Cadastrar</Button>
     </Flex>
